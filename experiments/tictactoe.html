@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <style>
+    .content {
+      height: 100vh;
+    }
+
+    .tt-c {
+      height: 8em;
+    }
+
+    .tt-r:nth-child(odd) > .tt-c:nth-child(odd) {
+      background-color: #dddddd;
+    }
+
+    .tt-r:nth-child(even) > .tt-c:nth-child(even) {
+      background-color: #dddddd;
+    }
+
+    .tt-c:not(.X .O):hover {
+      background-color: #aaaaaa !important;
+    }
+
+    .X {
+      background-color: blue !important;
+    }
+
+    .O {
+      background-color: gold !important;
+    }
+
+  </style>
+  <!-- Fonts -->
+  <link href='https://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>
+  <!-- Fdn CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/foundation/6.1.2/foundation-flex.min.css">
+</head>
+
+<body>
+  <div class="row align-middle align-center content">
+    <div class="small-12 medium-6 large-4 columns">
+      <div class="row tt-r" data-r="1">
+        <div class="column tt-c" data-c="1">
+        </div>
+        <div class="column tt-c" data-c="2">
+        </div>
+        <div class="column tt-c" data-c="3">
+        </div>
+      </div>
+      <div class="row tt-r" data-r="2">
+        <div class="column tt-c" data-c="1">
+        </div>
+        <div class="column tt-c" data-c="2">
+        </div>
+        <div class="column tt-c" data-c="3">
+        </div>
+      </div>
+      <div class="row tt-r" data-r="3">
+        <div class="column tt-c" data-c="1">
+        </div>
+        <div class="column tt-c" data-c="2">
+        </div>
+        <div class="column tt-c" data-c="3">
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/foundation/6.1.2/foundation.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.3.0/lodash.min.js"></script>
+  <script>
+    var GameBoard = function() {
+      this.board = [
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0]
+      ];
+      this.state = GameBoard.PossibleStates.NONE;
+      this.cpuMove = null;
+    }
+
+    GameBoard.Move = function(r, c, type) {
+      this.R = r;
+      this.C = c;
+      this.TYPE = type;
+    }
+
+    GameBoard.Player = {
+      HUMAN: 1,
+      COM: 2
+    }
+
+    GameBoard.PossibleStates = {
+      TIE: 3,
+      OWIN: GameBoard.Player.HUMAN,
+      XWIN: GameBoard.Player.COM,
+      NONE: 0
+    }
+
+    GameBoard.hasWon = function(move, currentBoard) {
+      var foundNull = false;
+      for(var r = 0; r < 3; r++) {
+        for(var c = 0; c < 3; c++) {
+          if(currentBoard[r][c] === 0) {
+            foundNull = true;
+          }
+        }
+      }
+      if(!foundNull) return GameBoard.PossibleStates.TIE;
+
+      //check row
+      for (var i = 0; i < 3; i++) {
+        if (currentBoard[move.R][i] != move.TYPE) break;
+        if (i == 2) return move.TYPE;
+      }
+      //check columns
+      for (var i = 0; i < 3; i++) {
+        if (currentBoard[i][move.C] != move.TYPE) break;
+        if (i == 2) return move.TYPE;
+      }
+      //check diag
+      if (move.R == move.C) {
+        for (var i = 0; i < 3; i++) {
+          if (currentBoard[i][i] != move.TYPE) break;
+          if (i == 2) return move.TYPE;
+        }
+      }
+      //check other diag
+      if (move.R == 2 - move.C) {
+        for (var i = 0; i < 3; i++) {
+          if (currentBoard[i][2 - i] != move.TYPE) break;
+          if (i == 2) return move.TYPE;
+        }
+      }
+
+      return GameBoard.PossibleStates.NONE;
+
+    }
+
+    GameBoard.prototype.madeMove = function(move) {
+      //make move to board
+      this.board[move.R][move.C] = move.TYPE;
+
+      var state = GameBoard.hasWon(move,this.board);
+
+      //has the player won/is it a tie?
+      if(state !== GameBoard.PossibleStates.NONE) {
+        this.state = state;
+        return;
+      }
+
+      //no one has won - decide cpu move
+      function decideNextMove(b,player) {
+        var bd = _.cloneDeep(b);
+        var outcomes = [];
+        for(var r = 0; r < 3; r++) {
+          for(var c = 0; c < 3; c++) {
+            if(bd[r][c] === 0) {
+              //is an elligible spot!
+              //create a move and apply it
+              var m = new GameBoard.Move(r,c,player);
+              bd[r][c] = player;
+
+              //whats the outcome?
+              var state = GameBoard.hasWon(m, bd);
+
+              if(state === m.TYPE) {
+                //this move wins
+                outcomes.push([state,m]);
+              } else if(state === GameBoard.PossibleStates.TIE) {
+                //this move ties
+                outcomes.push([state,m]);
+              } else {
+                //ok no outcome lets see the other guy's move
+                outcomes.push(decideNextMove(bd, player === GameBoard.Player.HUMAN ? GameBoard.Player.COM : GameBoard.Player.HUMAN));
+              }
+            }
+          }
+        }
+        //"tuple" - state, move
+        var strat;
+
+        console.log(outcomes);
+
+        for(var i = 0; i < outcomes.length; i++) {
+          if(outcomes[i][0] === player) {
+            return outcomes[i]; //return winning strat
+          } else if(outcomes[i][0] === GameBoard.PossibleStates.TIE) {
+            //take note of tying strat
+            strat = outcomes[i][0];
+          }
+        }
+        return strat;
+      }
+
+      var comMove = decideNextMove(this.board,GameBoard.Player.COM)[1];
+      console.log(comMove);
+      this.board[comMove.R][comMove.C] = comMove.TYPE;
+      this.state = GameBoard.hasWon(comMove,this.board);
+      this.cpuMove = comMove;
+    }
+
+    $(document).ready(function() {
+      var board = new GameBoard();
+      var clickBind = false;
+
+      $('.tt-c').click(function() {
+        if(clickBind) return;
+        clickBind = true;
+
+        var $cell = $(this);
+        $(this).addClass("X");
+        var move = new GameBoard.Move($cell.parent().data('r') - 1, $cell.data('c') - 1, GameBoard.Player.HUMAN);
+
+        board.madeMove(move);
+        if(board.cpuMove === null) throw Error("Error in determining move");
+        $('[data-r=' +  (board.cpuMove.R+1) + ']').find('[data-c=' + (board.cpuMove.C+1) + ']').addClass("O");
+
+        if(board.state === GameBoard.PossibleStates.NONE) {
+          clickBind = false;
+          return;
+        } else {
+          alert(board.state);
+        }
+
+      });
+    });
+  </script>
+</body>
+
+</html>
