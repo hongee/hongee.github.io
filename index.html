@@ -8,6 +8,7 @@
     <title>hongee</title>
     <!-- Fonts -->
     <link href='https://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Pacifico' rel='stylesheet' type='text/css'>
     <!-- Fdn CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/foundation/6.1.2/foundation-flex.min.css">
     <style>
@@ -51,6 +52,10 @@
       font-weight: 700;
     }
 
+    .welcome-header {
+      font-family: 'Pacifico', cursive;
+    }
+
     @media only screen and (max-width: 40em) {
       h1 {
         text-align: center;
@@ -81,7 +86,7 @@
         </div>
       </div>
       <div class="small-12 medium-6 large-4 columns">
-        <h1>Hi!</h1>
+        <h1 class="welcome-header">Hello!</h1>
         <p>
           I'm Hongyi Zhang <small>(pronouced hong-ee)</small>. I'm a freshman Computer Science student from <a href="http://qr.ae/RO9vzU" target="_blank">Singapore</a> studying at the University of California, Los Angeles.
         </p>
@@ -99,5 +104,15 @@
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/foundation/6.1.2/foundation.min.js"></script>
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-74079945-1', 'auto');
+      ga('send', 'pageview');
+
+    </script>
   </body>
 </html>
